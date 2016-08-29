@@ -32,6 +32,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FtdAdapter, Version=1.11.0.0, Culture=neutral, PublicKeyToken=b5aba55fcbc8d946, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>DLL\NMODBUS\FtdAdapter.dll</HintPath>
+    </Reference>
+    <Reference Include="Modbus, Version=1.11.0.0, Culture=neutral, PublicKeyToken=b5aba55fcbc8d946, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>DLL\NMODBUS\Modbus.dll</HintPath>
+    </Reference>
+    <Reference Include="Modbus.Extensions, Version=1.11.0.0, Culture=neutral, PublicKeyToken=b5aba55fcbc8d946, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>DLL\NMODBUS\Modbus.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,7 +78,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="App.config" />
-    <None Include="DLL\DtuLib.ini" />
+    <None Include="DLL\DTU_DLL\DtuLib.ini" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -78,8 +90,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DLL\DtuLib.dll" />
-    <Content Include="DLL\RunlogDLL.dll" />
+    <Content Include="DLL\DTU_DLL\DtuLib.dll" />
+    <Content Include="DLL\DTU_DLL\RunlogDLL.dll" />
+    <Content Include="DLL\NMODBUS\FTD2XX.dll" />
+    <Content Include="DLL\NMODBUS\FtdAdapter.dll" />
+    <Content Include="DLL\NMODBUS\log4net.dll" />
+    <Content Include="DLL\NMODBUS\Modbus.dll" />
+    <Content Include="DLL\NMODBUS\Modbus.Extensions.dll" />
+    <Content Include="DLL\NMODBUS\Unme.Common.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
