@@ -44,11 +44,17 @@ namespace DTUServiceMonitor
 
                 modeMaster = ModbusIpMaster.CreateIp(new TcpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 502)));
                 
+                
+
+
                 modeSlave.Listen();
 
                 modeSlave.ModbusSlaveRequestReceived += (s, ev) =>
                 {
-                    
+                    //ev.Message.MessageFrame[0] <--功能吗
+                    //ev.Message.MessageFrame[1]*256 + ev.Message.MessageFrame[2] <--起始地址
+                    //ev.Message.MessageFrame[3]*256 + ev.Message.MessageFrame[4] <--长度
+
                 };
 
 
