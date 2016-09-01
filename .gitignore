@@ -46,3 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 DTUServiceMonitor/DTUServiceMonitor/bin/Debug/ConfigFile.txt
+bin/
+obj/
+*.suo
