@@ -39,100 +39,26 @@ namespace DTUServiceMonitor
                 //    loggerQueue.Enqueue("启动DTU服务失败");
                 //}
 
+
                 modeSlave = ModbusTcpSlave.CreateTcp(1,
                     new TcpListener(IPAddress.Any, int.Parse(txtServerPort.Text)));
 
-                modeMaster = ModbusIpMaster.CreateIp(new TcpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 502)));
-                
+            
                 
 
-
+                //modeMaster = ModbusIpMaster.CreateIp(new TcpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 502)));
+                
                 modeSlave.Listen();
 
                 modeSlave.ModbusSlaveRequestReceived += (s, ev) =>
                 {
+
                     //ev.Message.MessageFrame[0] <--功能吗
                     //ev.Message.MessageFrame[1]*256 + ev.Message.MessageFrame[2] <--起始地址
                     //ev.Message.MessageFrame[3]*256 + ev.Message.MessageFrame[4] <--长度
 
                 };
 
-
-                //IPEndPoint serverIP = new IPEndPoint(IPAddress.Any, int.Parse(txtServerPort.Text)); //本机预使用的IP和端口
-                //Socket skServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                //skServer.Bind(serverIP);
-                //skServer.Listen(100);
-
-                //var mainThread = new Thread(() =>
-                //{
-                //    try
-                //    {
-                //        while (IsRunning)
-                //        {
-                //            Socket clientSocket;
-                //            try
-                //            {
-                //                //当有可用的客户端连接尝试时执行，并返回一个新的socket,用于与客户端之间的通信
-                //                clientSocket = skServer.Accept();
-                //                clientPool.Add(clientSocket);
-                //                var execThread = new Thread(o =>
-                //                {
-                //                    var sock = o as Socket;
-                //                    var readEvent = new SocketAsyncEventArgs();
-                //                    readEvent.Completed += (readSock, eventArgs) =>
-                //                    {
-                //                        var currentsock = readSock as Socket;
-                //                        if (eventArgs.BytesTransferred > 0 &&
-                //                            eventArgs.SocketError == SocketError.Success)
-                //                        {
-                //                            //切换数据
-
-                //                            //发送数据给currentsock
-                //                        }
-                //                        else
-                //                        {
-                //                            currentsock.Close();
-                //                        }
-                //                    };
-                //                    sock.ReceiveAsync(readEvent);
-
-                //                    var sendEvent = new SocketAsyncEventArgs();
-                //                    sendEvent.Completed += (sendSock, eventArgs) =>
-                //                    {
-                //                        var currentsock = sendSock as Socket;
-                //                        if (eventArgs.BytesTransferred > 0 &&
-                //                            eventArgs.SocketError == SocketError.Success)
-                //                        {
-                //                            //切换数据
-
-                //                            //查找到对应的DTU
-
-                //                            //发送数据给DTU
-                //                        }
-                //                        else
-                //                        {
-                //                            currentsock.Close();
-                //                        }
-                //                    };
-                //                    sock.SendAsync(sendEvent);
-                //                });
-                //                execThread.Start(clientSocket);
-                //            }
-                //            catch (Exception ex)
-                //            {
-                //                loggerQueue.Enqueue("接收用户连接失败" + ex.Message);
-                //                continue;
-                //            }
-                //            Thread.Sleep(10);
-                //        }
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        loggerQueue.Enqueue("主线程内发生错误" + ex.Message + ",主线程已经退出!");
-                //    }
-
-                //});
-                //mainThread.Start();
 
             }
             catch (Exception ex)
@@ -143,17 +69,10 @@ namespace DTUServiceMonitor
 
 
 
-
-
         private void btnStop_Click(object sender, EventArgs e)
         {
             IsRunning = false;
             modeSlave.Dispose();
-            //foreach (var client in clientPool)
-            //{
-            //    client.Close(1);
-            //}
-            //DTUWrapper.DSStopService();
         }
     }
 }

@@ -15,7 +15,9 @@ namespace DTUServiceMonitor
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            ConfigurationAdapter.Initial();
             Application.Run(new Form1());
+            ConfigurationAdapter.Dispose();
         }
     }
 }
