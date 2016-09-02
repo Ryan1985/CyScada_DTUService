@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Modbus.Data;
+using Modbus.Utility;
 
 namespace DTUServiceMonitor
 {
@@ -14,9 +15,7 @@ namespace DTUServiceMonitor
 
         public static DataStore slaveDataStore;
 
-
-
-
+       
 
         public static void StartServer(int port)
         {
@@ -46,27 +45,31 @@ namespace DTUServiceMonitor
                                 continue;
                             case 3:
                             {
-                                for (var i = 0; i < dds.m_data_len; i++)
+                                //判断站号
+                                if (dds.m_data_buf[0] != configModel.DTUDeviceId)
                                 {
-                                    slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i] =
+                                    continue;
+                                }
+                                if (dds.m_data_buf[1] != 3)
+                                {
+                                    continue;
+                                }
+                                //验证CRC
+                                if (!ValidateCrc(dds.m_data_buf))
+                                {
+                                    continue;
+                                }
+
+                                //解析读协议
+                                var length = dds.m_data_buf[2];
+                                for (var i = 3; i < length; i++)
+                                {
+                                    slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
                                 }
                                 continue;
                             }
                         }
-
-
-                        //if (IsHexShow)
-                        //{
-                        //    string d = ByteToString(dds.m_data_buf, dds.m_data_len);
-                        //    str = string.Format("{0}{1}", str, d);
-                        //}
-                        //else
-                        //{
-                        //    str = string.Format("{0}{1}", str,
-                        //        Encoding.Default.GetString(dds.m_data_buf, 0, dds.m_data_len));
-                        //}
-                        //UpdateInfoTxtBox(str);
                     }
                 }
             });
@@ -80,15 +83,33 @@ namespace DTUServiceMonitor
                     var configTable = ConfigurationAdapter.GetConfigTable();
                     foreach (var kv in configTable)
                     {
-
-                        //DTUWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.PhoneNo), (ushort)rc, data);
+                        var dataByte = new byte[6];
+                        dataByte[0] = (byte)kv.Value.DTUDeviceId;
+                        dataByte[1] = (byte)kv.Value.DTUFunctionCode;
+                        dataByte[2] = (byte)(kv.Value.DTUAddressStart / 256);
+                        dataByte[3] = (byte)(kv.Value.DTUAddressStart % 256);
+                        dataByte[4] = (byte)(kv.Value.DTUAddressLength / 256);
+                        dataByte[5] = (byte)(kv.Value.DTUAddressLength % 256);
+                        var crc = ModbusUtility.CalculateCrc(dataByte);
+                        var sendBytes = new byte[8];
+                        Buffer.BlockCopy(dataByte, 0, sendBytes, 0, 6);
+                        Buffer.BlockCopy(crc, 0, sendBytes, 6, 2);
+                        DTUWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.PhoneNo), (ushort)sendBytes.Length, sendBytes);
                     }
-
                     Thread.Sleep(100);
                 }
             });
 
 
+        }
+
+        private static bool ValidateCrc(byte[] buf)
+        {
+            var datalength = (int)(buf[2]);
+            var databuf = new byte[buf.Length - 2];
+            Buffer.BlockCopy(buf, 0, databuf, 0, databuf.Length);
+            var crc = ModbusUtility.CalculateCrc(databuf);
+            return (crc[0] == buf[datalength] && crc[1] == buf[datalength + 1]);
         }
 
 
