@@ -20,7 +20,6 @@ namespace DTUServiceMonitor
             InitializeComponent();
         }
 
-        private Queue<string> loggerQueue = new Queue<string>();
         private volatile bool IsRunning = true;
         private ModbusTcpSlave modeSlave;
         private ModbusIpMaster modeMaster;
@@ -50,20 +49,27 @@ namespace DTUServiceMonitor
                 
                 modeSlave.Listen();
 
-                modeSlave.ModbusSlaveRequestReceived += (s, ev) =>
+
+
+                ThreadPool.QueueUserWorkItem(o =>
                 {
+                    while (IsRunning)
+                    {
+                        if (Logger.Count > 0)
+                        {
+                            var str = Logger.Dequeue();
+                            richTextBox1.AppendText(str + "\r\n");
+                        }
+                        Thread.Sleep(100);
+                    }
+                });
 
-                    //ev.Message.MessageFrame[0] <--功能吗
-                    //ev.Message.MessageFrame[1]*256 + ev.Message.MessageFrame[2] <--起始地址
-                    //ev.Message.MessageFrame[3]*256 + ev.Message.MessageFrame[4] <--长度
-
-                };
 
 
             }
             catch (Exception ex)
             {
-                loggerQueue.Enqueue("程序界面线程出错，" + ex.Message + ",程序界面线程已经退出!"); 
+                Logger.Enqueue("程序界面线程出错，" + ex.Message + ",程序界面线程已经退出!"); 
             }
         }
 

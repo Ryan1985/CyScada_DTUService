@@ -19,15 +19,21 @@ namespace DTUServiceMonitor
             }
         }
 
-        public static void Dequeue(string logString)
+        public static string Dequeue()
         {
             lock (m_lock)
             {
-                logStringQueue.Enqueue(logString);
+                return logStringQueue.Count >= 0 ? logStringQueue.Dequeue() : null;
             }
         }
 
-
+        public static int Count
+        {
+            get
+            {
+                return logStringQueue.Count;
+            }
+        }
 
 
     }
