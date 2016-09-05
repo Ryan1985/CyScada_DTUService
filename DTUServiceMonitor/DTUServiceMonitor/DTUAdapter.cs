@@ -74,7 +74,8 @@ namespace DTUServiceMonitor
                                         dds.m_data_buf[i];
                                     strBuf.Append(dds.m_data_buf[i].ToString());
                                 }
-                                File.AppendAllText(configModel.PhoneNo, "[" + DateTime.Now + "]" + strBuf.ToString());
+                                File.AppendAllText(configModel.PhoneNo + ".txt",
+                                    "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
                                 continue;
                             }
                             case 3:
