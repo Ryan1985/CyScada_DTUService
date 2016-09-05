@@ -16,11 +16,10 @@ namespace DTUServiceMonitor
 
         public static DataStore slaveDataStore;
 
-       
 
         public static void StartServer(int port)
         {
-            if (DTUWrapper.DSStartService((ushort) port) == 0)
+            if (DTUSimWrapper.DSStartService((ushort) port) == 0)
             {
                 throw new Exception("启动DTU监听失败");
             }
@@ -34,12 +33,12 @@ namespace DTUServiceMonitor
                 int rc = 0;
                 while (IsRunning)
                 {
-                    rc = DTUWrapper.DSGetNextData(ref dds, 1);
+                    rc = DTUSimWrapper.DSGetNextData(ref dds, 1);
                     Logger.Enqueue("DTU服务收到数据");
                     if (rc != 0)
                     {
-                        var dtuId = Encoding.Default.GetString(dds.m_dtuId);
-                        var configModel = ConfigurationAdapter.GetConfigTable()[dtuId];
+                        var phoneNo = Encoding.Default.GetString(dds.m_phoneno);
+                        var configModel = ConfigurationAdapter.GetConfigTable()[phoneNo];
                         switch (configModel.ServerFunctionCode)
                         {
                             case 1:
@@ -58,6 +57,7 @@ namespace DTUServiceMonitor
                                     Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
                                     continue;
                                 }
+
                                 //验证CRC
                                 if (!ValidateCrc(dds.m_data_buf))
                                 {
@@ -105,7 +105,8 @@ namespace DTUServiceMonitor
                                     slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
                                 }
-                                File.AppendAllText(configModel.PhoneNo, "[" + DateTime.Now + "]" + strBuf.ToString());
+                                File.AppendAllText(configModel.PhoneNo + ".txt",
+                                    "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
                                 continue;
                             }
                         }
@@ -134,7 +135,7 @@ namespace DTUServiceMonitor
                         var sendBytes = new byte[8];
                         Buffer.BlockCopy(dataByte, 0, sendBytes, 0, 6);
                         Buffer.BlockCopy(crc, 0, sendBytes, 6, 2);
-                        DTUWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.PhoneNo), (ushort)sendBytes.Length, sendBytes);
+                        DTUSimWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.PhoneNo), (ushort)sendBytes.Length, sendBytes);
                     }
                     Thread.Sleep(100);
                 }
@@ -159,7 +160,7 @@ namespace DTUServiceMonitor
 
         public static void Dispose()
         {
-            DTUWrapper.DSStopService();
+            DTUSimWrapper.DSStopService();
         }
 
     }

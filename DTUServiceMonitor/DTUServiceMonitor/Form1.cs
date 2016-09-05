@@ -23,9 +23,22 @@ namespace DTUServiceMonitor
         private volatile bool IsRunning = true;
         private ModbusTcpSlave modeSlave;
         private ModbusIpMaster modeMaster;
+        private delegate void ShowText(RichTextBox rb,string str);
+
+        private ShowText showText;
+
+        private void ShowTxt(RichTextBox rb, string str)
+        {
+            rb.AppendText(str + "\r\n");
+        }
+
+
+
+
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            showText = ShowTxt;
             try
             {
                 //if (DTUWrapper.DSStartService(ushort.Parse(txtDTUPort.Text)) != 0)
@@ -44,7 +57,7 @@ namespace DTUServiceMonitor
                 //modeMaster = ModbusIpMaster.CreateIp(new TcpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 502)));
                 
                 modeSlave.Listen();
-
+                DTUAdapter.slaveDataStore = modeSlave.DataStore;
                 DTUAdapter.StartServer(int.Parse(txtDTUPort.Text));
 
                 ThreadPool.QueueUserWorkItem(o =>
@@ -54,7 +67,7 @@ namespace DTUServiceMonitor
                         if (Logger.Count > 0)
                         {
                             var str = Logger.Dequeue();
-                            richTextBox1.AppendText(str + "\r\n");
+                            Invoke(showText, richTextBox1, str);
                         }
                         Thread.Sleep(100);
                     }

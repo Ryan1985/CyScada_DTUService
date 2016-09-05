@@ -59,13 +59,14 @@
     <Compile Include="ConfigModel.cs" />
     <Compile Include="ConfigurationAdapter.cs" />
     <Compile Include="DTUAdapter.cs" />
-    <Compile Include="DTUWrapper.cs" />
+    <Compile Include="DTUSimWrapper.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="IDeviceWrapper.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
