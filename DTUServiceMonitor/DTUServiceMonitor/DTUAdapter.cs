@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -66,11 +67,14 @@ namespace DTUServiceMonitor
 
                                 //解析读协议
                                 var length = dds.m_data_buf[2];
+                                var strBuf = new StringBuilder();
                                 for (var i = 3; i < length; i++)
                                 {
                                     slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
-                                } 
+                                    strBuf.Append(dds.m_data_buf[i].ToString());
+                                }
+                                File.AppendAllText(configModel.PhoneNo, "[" + DateTime.Now + "]" + strBuf.ToString());
                                 continue;
                             }
                             case 3:
@@ -78,25 +82,30 @@ namespace DTUServiceMonitor
                                 //判断站号
                                 if (dds.m_data_buf[0] != configModel.DTUDeviceId)
                                 {
+                                    Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.m_data_buf[0]);
                                     continue;
                                 }
                                 if (dds.m_data_buf[1] != 3)
                                 {
+                                    Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
                                     continue;
                                 }
                                 //验证CRC
                                 if (!ValidateCrc(dds.m_data_buf))
                                 {
+                                    Logger.Enqueue("DTU服务收到错误CRC：验证未通过");
                                     continue;
                                 }
 
                                 //解析读协议
                                 var length = dds.m_data_buf[2];
+                                var strBuf = new StringBuilder();
                                 for (var i = 3; i < length; i++)
                                 {
                                     slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
                                 }
+                                File.AppendAllText(configModel.PhoneNo, "[" + DateTime.Now + "]" + strBuf.ToString());
                                 continue;
                             }
                         }

@@ -53,6 +53,7 @@
             this.txtServerPort.Name = "txtServerPort";
             this.txtServerPort.Size = new System.Drawing.Size(100, 21);
             this.txtServerPort.TabIndex = 1;
+            this.txtServerPort.Text = "9989";
             // 
             // txtDTUPort
             // 
@@ -60,6 +61,7 @@
             this.txtDTUPort.Name = "txtDTUPort";
             this.txtDTUPort.Size = new System.Drawing.Size(100, 21);
             this.txtDTUPort.TabIndex = 1;
+            this.txtDTUPort.Text = "8003";
             // 
             // label1
             // 
