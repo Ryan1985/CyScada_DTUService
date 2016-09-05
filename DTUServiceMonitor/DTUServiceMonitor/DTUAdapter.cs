@@ -24,7 +24,8 @@ namespace DTUServiceMonitor
                 throw new Exception("启动DTU监听失败");
             }
 
-            DtuDataStruct dds = new DtuDataStruct();
+            Logger.Enqueue("DTU服务启动");
+            var dds = new DtuDataStruct();
             //读取线程
             #region 读取线程
             ThreadPool.QueueUserWorkItem(o =>
@@ -33,6 +34,7 @@ namespace DTUServiceMonitor
                 while (IsRunning)
                 {
                     rc = DTUWrapper.DSGetNextData(ref dds, 1);
+                    Logger.Enqueue("DTU服务收到数据");
                     if (rc != 0)
                     {
                         var dtuId = Encoding.Default.GetString(dds.m_dtuId);
@@ -41,8 +43,36 @@ namespace DTUServiceMonitor
                         {
                             case 1:
                             case 2:
-                            case 4:
                                 continue;
+                            case 4:
+                            {
+                                //判断站号
+                                if (dds.m_data_buf[0] != configModel.DTUDeviceId)
+                                {
+                                    Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.m_data_buf[0]);
+                                    continue;
+                                }
+                                if (dds.m_data_buf[1] != 4)
+                                {
+                                    Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
+                                    continue;
+                                }
+                                //验证CRC
+                                if (!ValidateCrc(dds.m_data_buf))
+                                {
+                                    Logger.Enqueue("DTU服务收到错误CRC：验证未通过");
+                                    continue;
+                                }
+
+                                //解析读协议
+                                var length = dds.m_data_buf[2];
+                                for (var i = 3; i < length; i++)
+                                {
+                                    slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
+                                        dds.m_data_buf[i];
+                                } 
+                                continue;
+                            }
                             case 3:
                             {
                                 //判断站号
@@ -71,6 +101,7 @@ namespace DTUServiceMonitor
                             }
                         }
                     }
+                    Thread.Sleep(100);
                 }
             });
             #endregion 读取线程

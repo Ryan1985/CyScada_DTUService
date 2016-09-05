@@ -41,15 +41,11 @@ namespace DTUServiceMonitor
 
                 modeSlave = ModbusTcpSlave.CreateTcp(1,
                     new TcpListener(IPAddress.Any, int.Parse(txtServerPort.Text)));
-
-            
-                
-
                 //modeMaster = ModbusIpMaster.CreateIp(new TcpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 502)));
                 
                 modeSlave.Listen();
 
-
+                DTUAdapter.StartServer(int.Parse(txtDTUPort.Text));
 
                 ThreadPool.QueueUserWorkItem(o =>
                 {
@@ -79,6 +75,7 @@ namespace DTUServiceMonitor
         {
             IsRunning = false;
             modeSlave.Dispose();
+            DTUAdapter.Dispose();
         }
     }
 }
