@@ -43,26 +43,23 @@ namespace DTUServiceMonitor
                         {
                             case 1:
                             case 2:
-                                continue;
+                                break;
                             case 4:
                             {
                                 //判断站号
                                 if (dds.m_data_buf[0] != configModel.DTUDeviceId)
                                 {
                                     Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.m_data_buf[0]);
-                                    continue;
                                 }
                                 if (dds.m_data_buf[1] != 4)
                                 {
                                     Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
-                                    continue;
                                 }
 
                                 //验证CRC
                                 if (!ValidateCrc(dds.m_data_buf))
                                 {
                                     Logger.Enqueue("DTU服务收到错误CRC：验证未通过");
-                                    continue;
                                 }
 
                                 //解析读协议
@@ -76,26 +73,26 @@ namespace DTUServiceMonitor
                                 }
                                 File.AppendAllText(configModel.PhoneNo + ".txt",
                                     "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
-                                continue;
+
                             }
+                                break;
                             case 3:
                             {
                                 //判断站号
                                 if (dds.m_data_buf[0] != configModel.DTUDeviceId)
                                 {
                                     Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.m_data_buf[0]);
-                                    continue;
+
                                 }
                                 if (dds.m_data_buf[1] != 3)
                                 {
                                     Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
-                                    continue;
+
                                 }
                                 //验证CRC
                                 if (!ValidateCrc(dds.m_data_buf))
                                 {
                                     Logger.Enqueue("DTU服务收到错误CRC：验证未通过");
-                                    continue;
                                 }
 
                                 //解析读协议
@@ -108,8 +105,8 @@ namespace DTUServiceMonitor
                                 }
                                 File.AppendAllText(configModel.PhoneNo + ".txt",
                                     "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
-                                continue;
-                            }
+
+                            }break;
                         }
                     }
                     Thread.Sleep(100);

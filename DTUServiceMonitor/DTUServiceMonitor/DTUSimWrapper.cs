@@ -65,6 +65,8 @@ namespace DTUServiceMonitor
         private static ModbusSerialMaster modMaster;
 
         private static SerialPort sp = new SerialPort("COM2", 9600, Parity.Odd, 8,StopBits.One);
+        private static volatile bool IsRunning = true;
+
         public static int DSStartService(ushort uiListenPort)
         {
             sp.Open();
@@ -75,24 +77,29 @@ namespace DTUServiceMonitor
 
         public static int DSStopService()
         {
-            sp.Close();
+            IsRunning = false;
             modMaster.Dispose();
+            sp.Close();
             return 1;
         }
 
         public static int DSGetNextData(ref DtuDataStruct pDataStruct, ushort waitseconds)
         {
-            var byteValue = modMaster.ReadInputRegisters(1, 0, 3);
-            var head = new byte[] {1, 4, 9};
-            pDataStruct.m_data_buf = new byte[11];
-            var dataframe = new byte[9];
-            Buffer.BlockCopy(head, 0, dataframe, 0, 3);
-            Buffer.BlockCopy(byteValue, 0, dataframe, 3, 6);
-            var crc = Modbus.Utility.ModbusUtility.CalculateCrc(dataframe);
-            Buffer.BlockCopy(dataframe, 0, pDataStruct.m_data_buf, 0, 9);
-            Buffer.BlockCopy(crc, 0, pDataStruct.m_data_buf, 9, 2);
-            pDataStruct.m_data_len = 11;
-            pDataStruct.m_phoneno = Encoding.Default.GetBytes("13300000000");
+            if (IsRunning)
+            {
+                var byteValue = modMaster.ReadInputRegisters(1, 0, 3);
+                var head = new byte[] { 1, 4, 9 };
+                pDataStruct.m_data_buf = new byte[11];
+                var dataframe = new byte[9];
+                Buffer.BlockCopy(head, 0, dataframe, 0, 3);
+                Buffer.BlockCopy(byteValue, 0, dataframe, 3, 6);
+                var crc = Modbus.Utility.ModbusUtility.CalculateCrc(dataframe);
+                Buffer.BlockCopy(dataframe, 0, pDataStruct.m_data_buf, 0, 9);
+                Buffer.BlockCopy(crc, 0, pDataStruct.m_data_buf, 9, 2);
+                pDataStruct.m_data_len = 11;
+                pDataStruct.m_phoneno = Encoding.Default.GetBytes("13300000000");
+
+            }
             return 1;
         }
 
