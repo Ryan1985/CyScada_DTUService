@@ -34,7 +34,6 @@ namespace DTUServiceMonitor
                 while (IsRunning)
                 {
                     rc = DTUSimWrapper.DSGetNextData(ref dds, 1);
-                    Logger.Enqueue("DTU服务收到数据");
                     if (rc != 0)
                     {
                         var phoneNo = Encoding.Default.GetString(dds.m_phoneno);
