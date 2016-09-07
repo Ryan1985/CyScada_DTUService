@@ -62,23 +62,46 @@ namespace DTUServiceMonitor
 
     public class DTUSimWrapper
     {
-        private static ModbusSerialMaster modMaster;
+        //private static ModbusSerialMaster modMaster;
 
         private static SerialPort sp = new SerialPort("COM2", 9600, Parity.Odd, 8,StopBits.One);
         private static volatile bool IsRunning = true;
+        private static Queue<byte[]> DataQueue = new Queue<byte[]>();
+        private static object m_lock = new object();
+
 
         public static int DSStartService(ushort uiListenPort)
         {
+            sp.DataReceived += sp_DataReceived;
             sp.Open();
-            modMaster =
-                ModbusSerialMaster.CreateRtu(sp);
+            //modMaster =
+            //    ModbusSerialMaster.CreateRtu(sp);
             return 1;
+        }
+
+        static void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            var frame = new byte[sp.BytesToRead];
+            var readLength = sp.Read(frame, 0, sp.BytesToRead);
+            var remainLength = sp.BytesToRead - readLength;
+            while (remainLength > 0)
+            {
+                var readBytesLength = sp.Read(frame, readLength, remainLength);
+                readLength = readBytesLength + readLength;
+                remainLength = remainLength - readLength;
+            }
+
+            lock (m_lock)
+            {
+                DataQueue.Enqueue(frame);
+            }
+
         }
 
         public static int DSStopService()
         {
             IsRunning = false;
-            modMaster.Dispose();
+            //modMaster.Dispose();
             sp.Close();
             return 1;
         }
@@ -87,24 +110,64 @@ namespace DTUServiceMonitor
         {
             if (IsRunning)
             {
-                var byteValue = modMaster.ReadInputRegisters(1, 0, 3);
-                var head = new byte[] { 1, 4, 9 };
-                pDataStruct.m_data_buf = new byte[11];
-                var dataframe = new byte[9];
-                Buffer.BlockCopy(head, 0, dataframe, 0, 3);
-                Buffer.BlockCopy(byteValue, 0, dataframe, 3, 6);
-                var crc = Modbus.Utility.ModbusUtility.CalculateCrc(dataframe);
-                Buffer.BlockCopy(dataframe, 0, pDataStruct.m_data_buf, 0, 9);
-                Buffer.BlockCopy(crc, 0, pDataStruct.m_data_buf, 9, 2);
-                pDataStruct.m_data_len = 11;
-                pDataStruct.m_phoneno = Encoding.Default.GetBytes("13300000000");
+                if (DataQueue.Count == 0)
+                {
+                    return 0;
+                }
 
+                //解析协议
+                var frame = new byte[0];
+                lock (m_lock)
+                {
+                    frame = DataQueue.Dequeue();
+                }
+
+                if (frame.Length <= 3)//数据不全,则准备取下一贞数据
+                {
+                    if (DataQueue.Count == 0)
+                    {
+                        return 0;
+                    }
+
+
+                    lock (m_lock)
+                    {
+                        var part2 = DataQueue.Dequeue();
+                    }
+
+
+
+                    return 0;
+                }
+
+
+
+
+
+
+
+                //解析协议
+                byte[] byReceived;
+                lock (m_lock)
+                {
+                    byReceived = DataQueue.Dequeue();
+                }
+                pDataStruct.m_data_buf = byReceived;
+                pDataStruct.m_data_len = (ushort)(byReceived.Length);
+                pDataStruct.m_phoneno = Encoding.Default.GetBytes("13300000000");
+                return 1;
             }
             return 1;
         }
 
         public static int DSSendData(byte[] pPhone, ushort len, byte[] buf)
         {
+
+
+
+
+
+
             return 1;
         }
 
