@@ -66,7 +66,7 @@ namespace DTUServiceMonitor
 
         private static SerialPort sp = new SerialPort("COM2", 9600, Parity.Odd, 8,StopBits.One);
         private static volatile bool IsRunning = true;
-        private static Queue<byte[]> DataQueue = new Queue<byte[]>();
+        private static List<byte[]> DataQueue = new List<byte[]>();
         private static object m_lock = new object();
 
 
@@ -74,6 +74,7 @@ namespace DTUServiceMonitor
         {
             sp.DataReceived += sp_DataReceived;
             sp.Open();
+
             //modMaster =
             //    ModbusSerialMaster.CreateRtu(sp);
             return 1;
@@ -93,7 +94,7 @@ namespace DTUServiceMonitor
 
             lock (m_lock)
             {
-                DataQueue.Enqueue(frame);
+                DataQueue.Add(frame);
             }
 
         }
@@ -119,55 +120,96 @@ namespace DTUServiceMonitor
                 var frame = new byte[0];
                 lock (m_lock)
                 {
-                    frame = DataQueue.Dequeue();
+                    frame = DataQueue[0];
+                    DataQueue.RemoveAt(0);
                 }
 
-                if (frame.Length <= 3)//数据不全,则准备取下一贞数据
+                var result = ExtractFrame(ref frame);
+
+                if (!result)
                 {
-                    if (DataQueue.Count == 0)
-                    {
-                        return 0;
-                    }
-
-
-                    lock (m_lock)
-                    {
-                        var part2 = DataQueue.Dequeue();
-                    }
-
-
-
                     return 0;
                 }
 
-
-
-
-
-
-
-                //解析协议
-                byte[] byReceived;
-                lock (m_lock)
-                {
-                    byReceived = DataQueue.Dequeue();
-                }
-                pDataStruct.m_data_buf = byReceived;
-                pDataStruct.m_data_len = (ushort)(byReceived.Length);
+                pDataStruct.m_data_buf = frame;
+                pDataStruct.m_data_len = (ushort)(frame.Length);
                 pDataStruct.m_phoneno = Encoding.Default.GetBytes("13300000000");
                 return 1;
             }
             return 1;
         }
 
+        private static bool ExtractFrame(ref byte[] frame)
+        {
+            var bufFrame = new byte[frame.Length];
+            Buffer.BlockCopy(frame, 0, bufFrame, 0, frame.Length);
+            while (IsRunning)
+            {
+                if (bufFrame.Length <= 3)//数据不全,则准备取下一贞数据
+                {
+                    if (AppendNextFrame(ref bufFrame) == false)//没有下一帧，返回
+                    {
+                        lock (m_lock)
+                        {
+                            DataQueue.Insert(0, bufFrame);
+                        }
+                        return false;
+                    }
+                    continue;
+                }
+
+                var frameLength = bufFrame[2];
+                if (bufFrame.Length < 3 + frameLength + 2)//如果数据不全(协议中的数据长度<头_3B+数据_bufFrame[2]+CRC_2B),则准备取下一帧
+                {
+                    if (AppendNextFrame(ref bufFrame) == false)//没有下一帧，返回
+                    {
+                        lock (m_lock)
+                        {
+                            DataQueue.Insert(0, bufFrame);
+                        }
+                        return false;
+                    }
+                    continue;
+                }
+                //一帧数据完整并且保存在了bufFrame中
+                break;
+            }
+
+            //切分贞，将多余数据放入DataQueue
+            var modFrameLength = 3 + bufFrame[2] + 2;
+            frame = new byte[modFrameLength];
+            Buffer.BlockCopy(bufFrame, 0, frame, 0, modFrameLength);
+            var modFragment = new byte[bufFrame.Length - 3 - bufFrame[2] - 2];
+            if (modFragment.Length > 0)
+            {
+                Buffer.BlockCopy(bufFrame, modFrameLength, modFragment, 0, modFragment.Length);
+                DataQueue.Insert(0, modFragment);
+            }
+            return true;
+        }
+
+        private static bool AppendNextFrame(ref byte[] frame)
+        {
+            if (DataQueue.Count == 0)//没有下一帧则退出
+            {
+                return false;
+            }
+
+            lock (m_lock)
+            {
+                var section = DataQueue[0];
+                DataQueue.RemoveAt(0);
+                var bufFrame = new byte[frame.Length + section.Length];
+                Buffer.BlockCopy(frame, 0, bufFrame, 0, frame.Length);
+                Buffer.BlockCopy(section, 0, bufFrame, frame.Length, section.Length);
+                frame = bufFrame;
+            }
+            return true;
+        }
+
         public static int DSSendData(byte[] pPhone, ushort len, byte[] buf)
         {
-
-
-
-
-
-
+            sp.Write(buf, 0, len);
             return 1;
         }
 

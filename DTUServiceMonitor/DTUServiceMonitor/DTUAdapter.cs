@@ -147,7 +147,7 @@ namespace DTUServiceMonitor
             var databuf = new byte[buf.Length - 2];
             Buffer.BlockCopy(buf, 0, databuf, 0, databuf.Length);
             var crc = ModbusUtility.CalculateCrc(databuf);
-            return (crc[0] == buf[datalength] && crc[1] == buf[datalength + 1]);
+            return (crc[0] == buf[datalength + 2] && crc[1] == buf[datalength + 2 + 1]);
         }
 
 
