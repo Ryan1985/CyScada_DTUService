@@ -66,12 +66,13 @@ namespace DTUServiceMonitor
                                 var strBuf = new StringBuilder();
                                 for (var i = 3; i < length; i++)
                                 {
-                                    slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
+                                    slaveDataStore.InputRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
                                     strBuf.Append(dds.m_data_buf[i].ToString());
                                 }
-                                File.AppendAllText(configModel.PhoneNo + ".txt",
-                                    "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
+                                //File.AppendAllText(
+                                //    configModel.PhoneNo + "_" + DateTime.Now.Date.ToString("yyyyMMdd") + ".txt",
+                                //    "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
 
                             }
                                 break;
@@ -102,8 +103,9 @@ namespace DTUServiceMonitor
                                     slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
                                 }
-                                File.AppendAllText(configModel.PhoneNo + ".txt",
-                                    "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
+                                //File.AppendAllText(
+                                //    configModel.PhoneNo + "_" + DateTime.Now.Date.ToString("yyyyMMdd") + ".txt",
+                                //    "[" + DateTime.Now + "]" + strBuf.ToString() + "\r\n");
 
                             }break;
                         }
@@ -147,7 +149,7 @@ namespace DTUServiceMonitor
             var databuf = new byte[buf.Length - 2];
             Buffer.BlockCopy(buf, 0, databuf, 0, databuf.Length);
             var crc = ModbusUtility.CalculateCrc(databuf);
-            return (crc[0] == buf[datalength + 2] && crc[1] == buf[datalength + 2 + 1]);
+            return (crc[0] == buf[datalength + 3] && crc[1] == buf[datalength + 3 + 1]);
         }
 
 
