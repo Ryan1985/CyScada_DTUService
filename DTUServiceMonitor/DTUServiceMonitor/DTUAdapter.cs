@@ -68,7 +68,7 @@ namespace DTUServiceMonitor
                                 {
                                     slaveDataStore.InputRegisters[configModel.ServerAddressStart + i - 3] =
                                         dds.m_data_buf[i];
-                                    strBuf.Append(dds.m_data_buf[i].ToString());
+                                    //strBuf.Append(dds.m_data_buf[i].ToString());
                                 }
                                 //File.AppendAllText(
                                 //    configModel.PhoneNo + "_" + DateTime.Now.Date.ToString("yyyyMMdd") + ".txt",
@@ -110,7 +110,7 @@ namespace DTUServiceMonitor
                             }break;
                         }
                     }
-                    Thread.Sleep(100);
+                    Thread.Sleep(50);
                 }
             });
             #endregion 读取线程
@@ -151,10 +151,6 @@ namespace DTUServiceMonitor
             var crc = ModbusUtility.CalculateCrc(databuf);
             return (crc[0] == buf[datalength + 3] && crc[1] == buf[datalength + 3 + 1]);
         }
-
-
-
-
 
 
         public static void Dispose()

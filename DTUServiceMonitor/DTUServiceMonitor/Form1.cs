@@ -33,36 +33,21 @@ namespace DTUServiceMonitor
         }
 
 
-
-
-
         private void btnStart_Click(object sender, EventArgs e)
         {
             showText = ShowTxt;
             try
             {
-                //if (DTUWrapper.DSStartService(ushort.Parse(txtDTUPort.Text)) != 0)
-                //{
-
-                //    loggerQueue.Enqueue("启动DTU服务成功");
-                //}
-                //else
-                //{
-                //    loggerQueue.Enqueue("启动DTU服务失败");
-                //}
-
-
+                Logger.Enqueue("程序开始启动..."); 
                 modeSlave = ModbusTcpSlave.CreateTcp(1,
                     new TcpListener(IPAddress.Any, int.Parse(txtServerPort.Text)));
-                //modeMaster = ModbusIpMaster.CreateIp(new TcpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 502)));
-                
                 modeSlave.Listen();
+                Logger.Enqueue("MODBUS服务已经启动完成"); 
                 DTUAdapter.slaveDataStore = modeSlave.DataStore;
                 DTUAdapter.StartServer(int.Parse(txtDTUPort.Text));
-
                 ThreadPool.QueueUserWorkItem(o =>
                 {
-                    while (IsRunning)
+                    while (IsRunning && Logger.Count != 0)
                     {
                         if (Logger.Count > 0)
                         {
@@ -86,9 +71,11 @@ namespace DTUServiceMonitor
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            IsRunning = false;
+            Logger.Enqueue("程序退出..."); 
             modeSlave.Dispose();
             DTUAdapter.Dispose();
+            Logger.Enqueue("程序退出完毕"); 
+            IsRunning = false;
         }
     }
 }

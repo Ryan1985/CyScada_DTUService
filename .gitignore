@@ -49,3 +49,4 @@ DTUServiceMonitor/DTUServiceMonitor/bin/
 DTUServiceMonitor/DTUServiceMonitor/obj/
 DTUServiceMonitor/*.suo
 DTUServiceMonitor/*.user
+*.user

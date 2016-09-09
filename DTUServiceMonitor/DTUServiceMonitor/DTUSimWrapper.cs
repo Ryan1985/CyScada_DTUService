@@ -209,8 +209,11 @@ namespace DTUServiceMonitor
 
         public static int DSSendData(byte[] pPhone, ushort len, byte[] buf)
         {
-            sp.Write(buf, 0, len);
-            return 1;
+            if (IsRunning)
+            {
+                sp.Write(buf, 0, len);
+                return 1;
+            }
         }
 
         public static uint DSGetDtuCount()
