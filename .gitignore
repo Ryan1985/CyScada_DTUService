@@ -45,14 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-DTUServiceMonitor/DTUServiceMonitor/bin/Debug/ConfigFile.txt
-bin/
-obj/
-*.suo
-DTUServiceMonitor/DTUServiceMonitor.v12.suo
-*.suo
-DTUServiceMonitor/DTUServiceMonitor.v12.suo
-*.suo
-*.suo
-DTUServiceMonitor/DTUServiceMonitor/bin/Debug/DTUServiceMonitor.exe
-*.user
+DTUServiceMonitor/DTUServiceMonitor/bin/
+DTUServiceMonitor/DTUServiceMonitor/obj/
+DTUServiceMonitor/*.suo
+DTUServiceMonitor/*.user
