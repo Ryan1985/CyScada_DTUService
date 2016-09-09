@@ -53,3 +53,6 @@ DTUServiceMonitor/DTUServiceMonitor.v12.suo
 *.suo
 DTUServiceMonitor/DTUServiceMonitor.v12.suo
 *.suo
+*.suo
+DTUServiceMonitor/DTUServiceMonitor/bin/Debug/DTUServiceMonitor.exe
+*.user
