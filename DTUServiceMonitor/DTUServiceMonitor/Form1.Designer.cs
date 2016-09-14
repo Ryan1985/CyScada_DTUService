@@ -61,7 +61,7 @@
             this.txtDTUPort.Name = "txtDTUPort";
             this.txtDTUPort.Size = new System.Drawing.Size(100, 21);
             this.txtDTUPort.TabIndex = 1;
-            this.txtDTUPort.Text = "8003";
+            this.txtDTUPort.Text = "5001";
             // 
             // label1
             // 

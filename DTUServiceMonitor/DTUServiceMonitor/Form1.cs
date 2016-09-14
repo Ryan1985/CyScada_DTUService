@@ -25,6 +25,9 @@ namespace DTUServiceMonitor
         private ModbusIpMaster modeMaster;
         private delegate void ShowText(RichTextBox rb,string str);
 
+        private DTUAdapter dtuAdapter = new DTUAdapter();
+
+
         private ShowText showText;
 
         private void ShowTxt(RichTextBox rb, string str)
@@ -42,12 +45,12 @@ namespace DTUServiceMonitor
                 modeSlave = ModbusTcpSlave.CreateTcp(1,
                     new TcpListener(IPAddress.Any, int.Parse(txtServerPort.Text)));
                 modeSlave.Listen();
-                Logger.Enqueue("MODBUS服务已经启动完成"); 
-                DTUAdapter.slaveDataStore = modeSlave.DataStore;
-                DTUAdapter.StartServer(int.Parse(txtDTUPort.Text));
+                Logger.Enqueue("MODBUS服务已经启动完成");
+                dtuAdapter.slaveDataStore = modeSlave.DataStore;
+                dtuAdapter.StartServer(int.Parse(txtDTUPort.Text));
                 ThreadPool.QueueUserWorkItem(o =>
                 {
-                    while (IsRunning && Logger.Count != 0)
+                    while (IsRunning || Logger.Count != 0)
                     {
                         if (Logger.Count > 0)
                         {
@@ -73,7 +76,7 @@ namespace DTUServiceMonitor
         {
             Logger.Enqueue("程序退出..."); 
             modeSlave.Dispose();
-            DTUAdapter.Dispose();
+            dtuAdapter.Dispose();
             Logger.Enqueue("程序退出完毕"); 
             IsRunning = false;
         }
