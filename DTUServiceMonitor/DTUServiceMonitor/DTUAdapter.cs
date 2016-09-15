@@ -44,9 +44,15 @@ namespace DTUServiceMonitor
                     rc = GPRSDTUWrapper.DSGetNextData(ref dds, 1);
                     if (rc != 0)
                     {
-                        Logger.Enqueue("DTU服务收到数据");
-                        var phoneNo = Encoding.Default.GetString(dds.m_phoneno);
-                        var configModel = ConfigurationAdapter.GetConfigTable()[phoneNo];
+                        Logger.Enqueue("DTU服务收到数据:" + rc);
+                        Logger.Enqueue("DTU服务收到数据id:" + dds.m_dtuId);
+                        Logger.Enqueue("DTU服务收到数据len:" + dds.m_data_len);
+                        Logger.Enqueue("DTU服务收到数据type:" + dds.m_data_type);
+                        Logger.Enqueue("DTU服务收到数据dataleng:" + dds.m_data_buf.Length);
+
+                        //var phoneNo = Encoding.Default.GetString(dds.m_phoneno);
+                        var modId = dds.m_dtuId;
+                        var configModel = ConfigurationAdapter.GetConfigTable()[modId.ToString()];
                         switch (configModel.ServerFunctionCode)
                         {
                             case 1:
@@ -155,7 +161,7 @@ namespace DTUServiceMonitor
                             var sendBytes = new byte[8];
                             Buffer.BlockCopy(dataByte, 0, sendBytes, 0, 6);
                             Buffer.BlockCopy(crc, 0, sendBytes, 6, 2);
-                            var result = GPRSDTUWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.DTUId), (ushort)sendBytes.Length, sendBytes);
+                            var result = GPRSDTUWrapper.DSSendData(uint.Parse(kv.Value.DTUId), (ushort)sendBytes.Length, sendBytes);
                             Logger.Enqueue("发送数据到" + kv.Value.DTUId+":"+result.ToString());
                             try
                             {
@@ -202,7 +208,7 @@ namespace DTUServiceMonitor
                                 DtuInfoStruct dis = new DtuInfoStruct();
                                 if (GPRSDTUWrapper.DSGetModemByPosition(i, ref dis) > 0)
                                 {
-                                    string id = Encoding.Default.GetString(dis.m_dtuId);
+                                    string id = dis.m_dtuId.ToString();
                                     string sim = Encoding.Default.GetString(dis.m_phoneno,0,11);
                                     string ip = StIPtoString(dis.m_dynip);
                                     string sitename = string.Format("{0}:{1}", id, sim);
