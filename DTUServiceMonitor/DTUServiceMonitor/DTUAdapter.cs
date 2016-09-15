@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Modbus.Data;
@@ -23,11 +24,11 @@ namespace DTUServiceMonitor
 
         public void StartServer(int port)
         {
-            if (DTUWrapper.DSStartService((ushort) port) == 0)
+            if (GPRSDTUWrapper.DSStartService((ushort) port) == 0)
             {
-                var exception=string.Empty;
-                DTUWrapper.DSGetLastError(exception, 500);
-                throw new Exception("启动DTU监听失败" + exception);
+                var exception = Marshal.AllocHGlobal(200);
+                GPRSDTUWrapper.DSGetLastError(exception, 200);
+                throw new Exception("启动DTU监听失败" + Marshal.PtrToStringAnsi(exception));
             }
 
             Logger.Enqueue("DTU服务启动");
@@ -40,7 +41,7 @@ namespace DTUServiceMonitor
                 int rc = 0;
                 while (IsRunning)
                 {
-                    rc = DTUWrapper.DSGetNextData(ref dds, 1);
+                    rc = GPRSDTUWrapper.DSGetNextData(ref dds, 1);
                     if (rc != 0)
                     {
                         Logger.Enqueue("DTU服务收到数据");
@@ -134,7 +135,7 @@ namespace DTUServiceMonitor
                         SiteList = new Dictionary<string, Hashtable>();
                         foreach (var siteinfo in SiteInfoList)
                         {
-                            SiteList.Add(siteinfo["SIM"].ToString(), siteinfo);
+                            SiteList.Add(siteinfo["ID"].ToString(), siteinfo);
                         }
                     }
 
@@ -154,8 +155,19 @@ namespace DTUServiceMonitor
                             var sendBytes = new byte[8];
                             Buffer.BlockCopy(dataByte, 0, sendBytes, 0, 6);
                             Buffer.BlockCopy(crc, 0, sendBytes, 6, 2);
-                            var result = DTUWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.PhoneNo), (ushort)sendBytes.Length, sendBytes);
-                            Logger.Enqueue("发送数据到" + kv.Value.PhoneNo+":"+result.ToString());
+                            var result = GPRSDTUWrapper.DSSendData(Encoding.Default.GetBytes(kv.Value.DTUId), (ushort)sendBytes.Length, sendBytes);
+                            Logger.Enqueue("发送数据到" + kv.Value.DTUId+":"+result.ToString());
+                            try
+                            {
+
+                                var strError = Marshal.AllocHGlobal(200);
+                                GPRSDTUWrapper.DSGetLastError( strError, 200);
+                                Logger.Enqueue(Marshal.PtrToStringAnsi(strError));
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Enqueue(ex.Message);
+                            }
                             var str = new StringBuilder();
                             for (var i = 0; i < sendBytes.Length; i++)
                             {
@@ -178,7 +190,7 @@ namespace DTUServiceMonitor
                 while (IsRunning)
                 {
                     uint rc = 0;
-                    rc = DTUWrapper.DSGetDtuCount();
+                    rc = GPRSDTUWrapper.DSGetModemCount();
                     if (rc != SiteOnline)
                     {
                         Logger.Enqueue("刷新DTU列表");
@@ -188,10 +200,10 @@ namespace DTUServiceMonitor
                             for (uint i = 0; i < rc; i++)
                             {
                                 DtuInfoStruct dis = new DtuInfoStruct();
-                                if (DTUWrapper.DSGetDtuByPosition(i, ref dis) > 0)
+                                if (GPRSDTUWrapper.DSGetModemByPosition(i, ref dis) > 0)
                                 {
-                                    string id = Encoding.Default.GetString(dis.m_dtuId, 0, 9);
-                                    string sim = Encoding.Default.GetString(dis.m_phoneno, 0, 11);
+                                    string id = Encoding.Default.GetString(dis.m_dtuId);
+                                    string sim = Encoding.Default.GetString(dis.m_phoneno,0,11);
                                     string ip = StIPtoString(dis.m_dynip);
                                     string sitename = string.Format("{0}:{1}", id, sim);
                                     SiteInfoList.Add(new Hashtable
@@ -204,6 +216,10 @@ namespace DTUServiceMonitor
                                         {"LastTime", UxToDateTime(dis.m_refresh_time)},
 
                                     });
+                                    Logger.Enqueue("id:"+id);
+                                    Logger.Enqueue("sim:"+sim);
+                                    Logger.Enqueue("ip:"+ip);
+                                    Logger.Enqueue("sitename:"+sitename);
                                 }
                             }
                         }
@@ -253,7 +269,7 @@ namespace DTUServiceMonitor
         public void Dispose()
         {
             IsRunning = false;
-            DTUWrapper.DSStopService();
+            GPRSDTUWrapper.DSStopService();
         }
 
     }

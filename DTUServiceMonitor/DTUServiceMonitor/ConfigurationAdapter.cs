@@ -100,7 +100,7 @@ namespace DTUServiceMonitor
                             proper.SetValue(config, Convert.ChangeType(propertyString[j], proper.PropertyType), null);
                         }
                         syncConfigModel.Add(config);
-                        configIndex.Add(config.PhoneNo);
+                        configIndex.Add(config.DTUId);
                     }
 
                     lock (m_lock)

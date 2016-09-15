@@ -59,7 +59,7 @@
     <Compile Include="ConfigModel.cs" />
     <Compile Include="ConfigurationAdapter.cs" />
     <Compile Include="DTUAdapter.cs" />
-    <Compile Include="DTUWrapper.cs" />
+    <Compile Include="GPRSDTUWrapper.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -101,7 +101,9 @@
     </Content>
     <Content Include="DLL\DTU_DLL\DtuLib.dll" />
     <Content Include="DLL\DTU_DLL\RunlogDLL.dll" />
-    <Content Include="DLL\GPRS\gprsdll.dll" />
+    <Content Include="DLL\GPRS\gprsdll.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="DLL\NMODBUS\FTD2XX.dll" />
     <Content Include="DLL\NMODBUS\FtdAdapter.dll" />
     <Content Include="DLL\NMODBUS\log4net.dll" />
