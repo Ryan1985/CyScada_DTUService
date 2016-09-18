@@ -9,12 +9,12 @@ namespace DTUServiceMonitor
     [StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Ansi)]
     public struct DtuInfoStruct
     {
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public uint m_dtuId;                                    //DTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public byte[] m_dynip;                                  //DTU的4位动态IP地址（为IP绑定新增）
+        public byte[] m_dtuId;                                    //DTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
         public byte[] m_phoneno;                                //DTU的11位电话号码，必须以'\0'字符结尾 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] m_dynip;                                  //DTU的4位动态IP地址（为IP绑定新增）
         public ulong m_conn_time;                               //DTU模块最后一次建立TCP连接的时间
         public ulong m_refresh_time;                            //DTU模块最后一次收发数据的时间
     }
@@ -22,13 +22,14 @@ namespace DTUServiceMonitor
     [StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Ansi)]
     public struct DtuDataStruct
     {
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public uint m_dtuId;                                  //DTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
-        public ulong m_recv_time;                               //接收到数据包的时间
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] m_dtuId;                                  //DTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] m_recv_time;                               //接收到数据包的时间
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1451)]
         public byte[] m_data_buf;                               //存储接收到的数据
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-        public ushort m_data_len;                               //接收到的数据包长度
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] m_data_len;                               //接收到的数据包长度
         public byte m_data_type;                                //接收到的数据包类型 0x01用户数据包 0x00不认识的数据
     }
 
