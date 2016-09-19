@@ -24,35 +24,37 @@ namespace DTUServiceMonitor
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public byte[] m_dtuId;                                  //DTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+        //public byte[] m_phone;                                  //DTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public byte[] m_recv_time;                               //接收到数据包的时间
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1451)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1452)]
         public byte[] m_data_buf;                               //存储接收到的数据
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public byte[] m_data_len;                               //接收到的数据包长度
         public byte m_data_type;                                //接收到的数据包类型 0x01用户数据包 0x00不认识的数据
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Ansi)]
-    public struct RtuDataStruct
-    {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public byte[] m_dtuId;                                  //RTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-        public byte[] m_phoneno;                                //RTU的11位电话号码，必须以'\0'字符结尾
-        public ulong m_recv_time;                               //接收到数据包的时间
-        public byte m_relay;                                    //8个继电器的状态，位寻址
-        public byte m_di;                                       //8个开关量输入的状态，位寻址
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public ushort[] m_ai;                                   //16路模拟输入的值
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public ushort[] m_pulse;                                //8路脉冲量输入的值
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public byte[] m_date;                                   //RTU时间
-        public byte m_csq;                                      //RTU信号量
-        public ushort m_dc;                                     //RTU电压值
-        public ushort m_rtu_version;                            //RTU版本
-    }
+    //[StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Ansi)]
+    //public struct RtuDataStruct
+    //{
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+    //    public byte[] m_dtuId;                                  //RTU模块的ID号，9个ASCII码，必须以‘\0'字符结尾
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+    //    public byte[] m_phoneno;                                //RTU的11位电话号码，必须以'\0'字符结尾
+    //    public ulong m_recv_time;                               //接收到数据包的时间
+    //    public byte m_relay;                                    //8个继电器的状态，位寻址
+    //    public byte m_di;                                       //8个开关量输入的状态，位寻址
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+    //    public ushort[] m_ai;                                   //16路模拟输入的值
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+    //    public ushort[] m_pulse;                                //8路脉冲量输入的值
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+    //    public byte[] m_date;                                   //RTU时间
+    //    public byte m_csq;                                      //RTU信号量
+    //    public ushort m_dc;                                     //RTU电压值
+    //    public ushort m_rtu_version;                            //RTU版本
+    //}
 
     public class GPRSDTUWrapper
     {
@@ -79,7 +81,7 @@ namespace DTUServiceMonitor
         public static extern int DSSendRtuRelayCmd(byte[] pPhone, byte Relay, byte Value, ushort Timeout);
         [DllImport("gprsdll.dll", CharSet = CharSet.Ansi)]
         public static extern int DSSendRtuSetTime(byte[] pPhone);
-        [DllImport("gprsdll.dll")]
-        public static extern int DSGetRtuData(byte[] pPhone, ref RtuDataStruct rtu, ushort waitseconds);
+        //[DllImport("gprsdll.dll")]
+        //public static extern int DSGetRtuData(byte[] pPhone, ref RtuDataStruct rtu, ushort waitseconds);
     }
 }
