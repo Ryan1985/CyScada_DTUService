@@ -80,5 +80,13 @@ namespace DTUServiceMonitor
             Logger.Enqueue("程序退出完毕"); 
             IsRunning = false;
         }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (dtuAdapter != null)
+            {
+                dtuAdapter.showLog = checkBox1.Checked;
+            }
+        }
     }
 }

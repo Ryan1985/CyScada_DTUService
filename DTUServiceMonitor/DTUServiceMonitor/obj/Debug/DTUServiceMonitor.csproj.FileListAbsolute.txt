@@ -13,4 +13,3 @@ G:\Github\Repos\CyScada_DTUService\DTUServiceMonitor\DTUServiceMonitor\obj\Debug
 G:\Github\Repos\CyScada_DTUService\DTUServiceMonitor\DTUServiceMonitor\obj\Debug\DTUServiceMonitor.csproj.GenerateResource.Cache
 G:\Github\Repos\CyScada_DTUService\DTUServiceMonitor\DTUServiceMonitor\obj\Debug\DTUServiceMonitor.exe
 G:\Github\Repos\CyScada_DTUService\DTUServiceMonitor\DTUServiceMonitor\obj\Debug\DTUServiceMonitor.pdb
-G:\Github\Repos\CyScada_DTUService\DTUServiceMonitor\DTUServiceMonitor\obj\Debug\DTUServiceMonitor.csprojResolveAssemblyReference.cache
