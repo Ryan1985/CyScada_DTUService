@@ -124,8 +124,8 @@ namespace ModSimWrapper
 
                 pDataStruct.m_data_buf = frame;
                 pDataStruct.m_data_len = BitConverter.GetBytes(frame.Length);
-                pDataStruct.m_phoneno = Encoding.Default.GetBytes("13300000000");
-                pDataStruct.m_dtuId = Encoding.Default.GetBytes("1953719668");
+                pDataStruct.m_phoneno = BitConverter.GetBytes(13300000000);
+                pDataStruct.m_dtuId = BitConverter.GetBytes(1953719668);
                 return 1;
             }
             return 1;

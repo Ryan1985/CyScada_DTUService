@@ -264,7 +264,7 @@ namespace DTUServiceMonitor
                                 if (_wrapper.GetDtuByPosition(i, ref dis) > 0)
                                 {
                                     int id =BitConverter.ToInt32(dis.Id,0);
-                                    string sim = Encoding.Default.GetString(dis.PhoneNo,0,11);
+                                    string sim = Encoding.Default.GetString(dis.Id, 0, dis.Id.Length);
                                     string ip = StIPtoString(dis.DynamicIp);
                                     string sitename = string.Format("{0}:{1}", id, sim);
                                     SiteInfoList.Add(new Hashtable
