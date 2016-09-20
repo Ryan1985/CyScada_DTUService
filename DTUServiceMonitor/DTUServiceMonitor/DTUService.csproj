@@ -7,8 +7,8 @@
     <ProjectGuid>{2AFACDE0-998C-454E-98B8-24AF219569CD}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DTUServiceMonitor</RootNamespace>
-    <AssemblyName>DTUServiceMonitor</AssemblyName>
+    <RootNamespace>DTUService</RootNamespace>
+    <AssemblyName>DTUService</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -59,7 +59,6 @@
     <Compile Include="ConfigModel.cs" />
     <Compile Include="ConfigurationAdapter.cs" />
     <Compile Include="DTUAdapter.cs" />
-    <Compile Include="GPRSDTUWrapper.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,6 +79,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="App.config">
       <SubType>Designer</SubType>
@@ -110,6 +110,15 @@
     <Content Include="DLL\NMODBUS\Modbus.dll" />
     <Content Include="DLL\NMODBUS\Modbus.Extensions.dll" />
     <Content Include="DLL\NMODBUS\Unme.Common.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DTUService.Interface\DTUService.Interface.csproj">
+      <Project>{31b02c9c-e035-4bbd-a5b0-3b91b1a1380d}</Project>
+      <Name>DTUService.Interface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Wrappers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

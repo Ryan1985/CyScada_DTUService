@@ -3,9 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using DTUService.Interface.Models;
+using DTUService.Interface.Wrappers;
 using Modbus.Data;
 using Modbus.Utility;
 
@@ -22,31 +25,46 @@ namespace DTUServiceMonitor
         private  object m_lock = new object();
         private  List<Hashtable> SiteInfoList = new List<Hashtable>();
         private  Dictionary<string, Hashtable> SiteList = new Dictionary<string, Hashtable>();
+        private IDtuWrapper _wrapper;
+        private IDataStruct _dataStruct;
+        private IInfoStruct _infoStruct;
+
+
+        public DTUAdapter(string wrapperDllPath)
+        {
+            var ass = Assembly.LoadFrom(wrapperDllPath);
+            var assNameSpace = ass.GetName().Name;
+            _wrapper = ass.CreateInstance(assNameSpace+"."+"Wrapper") as IDtuWrapper;
+            _dataStruct = ass.CreateInstance(assNameSpace + "." + "DataStruct") as IDataStruct;
+            _infoStruct = ass.CreateInstance(assNameSpace + "." + "InfoStruct") as IInfoStruct;
+        }
+
+
 
         public void StartServer(int port)
         {
-            if (GPRSDTUWrapper.DSStartService((ushort) port) == 0)
+            if (_wrapper.StartService((ushort)port) == 0)
             {
                 var exception = Marshal.AllocHGlobal(200);
-                GPRSDTUWrapper.DSGetLastError(exception, 200);
+                _wrapper.GetLastError(exception, 200);
                 throw new Exception("启动DTU监听失败" + Marshal.PtrToStringAnsi(exception));
             }
 
             Logger.Enqueue("DTU服务启动");
 
-            var dds = new DtuDataStruct();
+            var dds = _dataStruct.CreateNewInstance();
             //读取线程
             #region 读取线程
             ThreadPool.QueueUserWorkItem(o =>
             {
                 int rc = 0;
                 while (IsRunning)
-                {   
-                    rc = GPRSDTUWrapper.DSGetNextData(ref dds, 1);
+                {
+                    rc = _wrapper.GetNextData(ref dds, 1);
                     if (rc != 0)
                     {
                         //var phoneNo = Encoding.Default.GetString(dds.m_phoneno);
-                        var modId = dds.m_dtuId;
+                        var modId = dds.Id;
                         var configModel = ConfigurationAdapter.GetConfigTable()[BitConverter.ToInt32(modId,0).ToString()];
                         switch (configModel.ServerFunctionCode)
                         {
@@ -57,22 +75,22 @@ namespace DTUServiceMonitor
                                 {
                                     if (showLog)
                                     {
-                                        Logger.Enqueue("DTU收到数据dtuId：" + BitConverter.ToInt32(dds.m_dtuId, 0));
-                                        Logger.Enqueue("DTU收到数据data_len：" + BitConverter.ToInt16(dds.m_data_len, 0));
+                                        Logger.Enqueue("DTU收到数据dtuId：" + BitConverter.ToInt32(dds.Id, 0));
+                                        Logger.Enqueue("DTU收到数据data_len：" + BitConverter.ToInt16(dds.DataLength, 0));
                                     }
                                     //判断站号
-                                    if (dds.m_data_buf[0] != configModel.DTUDeviceId)
+                                    if (dds.DataBuff[0] != configModel.DTUDeviceId)
                                     {
-                                        Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.m_data_buf[0]);
+                                        Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.DataBuff[0]);
                                     }
-                                    if (dds.m_data_buf[1] != 4)
+                                    if (dds.DataBuff[1] != 4)
                                     {
-                                        Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
+                                        Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.DataBuff[1]);
                                     }
 
 
-                                    var realData = new byte[BitConverter.ToInt16(dds.m_data_len, 0)];
-                                    Buffer.BlockCopy(dds.m_data_buf, 0, realData, 0, realData.Length);
+                                    var realData = new byte[BitConverter.ToInt16(dds.DataLength, 0)];
+                                    Buffer.BlockCopy(dds.DataBuff, 0, realData, 0, realData.Length);
                                     //验证CRC
                                     if (!ValidateCrc(realData))
                                     {
@@ -80,7 +98,7 @@ namespace DTUServiceMonitor
                                     }
 
                                     //解析读协议
-                                    var length = dds.m_data_buf[2];
+                                    var length = dds.DataBuff[2];
 
                                     if (showLog)
                                     {
@@ -92,11 +110,11 @@ namespace DTUServiceMonitor
                                         if (showLog)
                                         {
                                             Logger.Enqueue("写入INPUT寄存器：" + (configModel.ServerAddressStart + i - 3) + "|" +
-                                                           (dds.m_data_buf[i]));
+                                                           (dds.DataBuff[i]));
                                         }
                                         slaveDataStore.InputRegisters[configModel.ServerAddressStart + i - 3] =
-                                            dds.m_data_buf[i];
-                                        strBuf.Append(dds.m_data_buf[i].ToString());
+                                            dds.DataBuff[i];
+                                        strBuf.Append(dds.DataBuff[i].ToString());
                                     }
                                     File.AppendAllText(
                                         configModel.DTUId + "_" + DateTime.Now.Date.ToString("yyyyMMdd") + ".txt",
@@ -109,22 +127,22 @@ namespace DTUServiceMonitor
 
                                     if (showLog)
                                     {
-                                        Logger.Enqueue("DTU收到数据dtuId：" + BitConverter.ToInt32(dds.m_dtuId, 0));
-                                        Logger.Enqueue("DTU收到数据data_len：" + BitConverter.ToInt16(dds.m_data_len, 0));
+                                        Logger.Enqueue("DTU收到数据dtuId：" + BitConverter.ToInt32(dds.Id, 0));
+                                        Logger.Enqueue("DTU收到数据data_len：" + BitConverter.ToInt16(dds.DataLength, 0));
                                     }
                                     //判断站号
-                                    if (dds.m_data_buf[0] != configModel.DTUDeviceId)
+                                    if (dds.DataBuff[0] != configModel.DTUDeviceId)
                                     {
-                                        Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.m_data_buf[0]);
+                                        Logger.Enqueue("DTU服务收到错误DEVICEID：" + dds.DataBuff[0]);
 
                                     }
-                                    if (dds.m_data_buf[1] != 3)
+                                    if (dds.DataBuff[1] != 3)
                                     {
-                                        Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.m_data_buf[1]);
+                                        Logger.Enqueue("DTU服务收到错误FunctionCode：" + dds.DataBuff[1]);
 
                                     }
-                                    var realData = new byte[BitConverter.ToInt16(dds.m_data_len, 0)];
-                                    Buffer.BlockCopy(dds.m_data_buf, 0, realData, 0, realData.Length);
+                                    var realData = new byte[BitConverter.ToInt16(dds.DataLength, 0)];
+                                    Buffer.BlockCopy(dds.DataBuff, 0, realData, 0, realData.Length);
                                     //验证CRC
                                     if (!ValidateCrc(realData))
                                     {
@@ -132,7 +150,7 @@ namespace DTUServiceMonitor
                                     }
 
                                     //解析读协议
-                                    var length = dds.m_data_buf[2];
+                                    var length = dds.DataBuff[2];
                                     if (showLog)
                                     {
                                         Logger.Enqueue("协议数据包长度：" + length);
@@ -143,10 +161,10 @@ namespace DTUServiceMonitor
                                         if (showLog)
                                         {
                                             Logger.Enqueue("写入INPUT寄存器：" + (configModel.ServerAddressStart + i - 3) + "|" +
-                                                           (dds.m_data_buf[i]));
+                                                           (dds.DataBuff[i]));
                                         }
                                         slaveDataStore.HoldingRegisters[configModel.ServerAddressStart + i - 3] =
-                                            dds.m_data_buf[i];
+                                            dds.DataBuff[i];
                                     }
                                     File.AppendAllText(
                                         configModel.DTUId + "_" + DateTime.Now.Date.ToString("yyyyMMdd") + ".txt",
@@ -191,7 +209,7 @@ namespace DTUServiceMonitor
                             var sendBytes = new byte[8];
                             Buffer.BlockCopy(dataByte, 0, sendBytes, 0, 6);
                             Buffer.BlockCopy(crc, 0, sendBytes, 6, 2);
-                            var result = GPRSDTUWrapper.DSSendData(uint.Parse(kv.Value.DTUId), (ushort)sendBytes.Length, sendBytes);
+                            var result = _wrapper.SendData(uint.Parse(kv.Value.DTUId), (ushort)sendBytes.Length, sendBytes);
 
                             if (showLog)
                             {
@@ -203,7 +221,7 @@ namespace DTUServiceMonitor
                                 {
 
                                     var strError = Marshal.AllocHGlobal(200);
-                                    GPRSDTUWrapper.DSGetLastError(strError, 200);
+                                    _wrapper.GetLastError(strError, 200);
                                     Logger.Enqueue(Marshal.PtrToStringAnsi(strError));
                                 }
                                 catch (Exception ex)
@@ -233,7 +251,7 @@ namespace DTUServiceMonitor
                 while (IsRunning)
                 {
                     uint rc = 0;
-                    rc = GPRSDTUWrapper.DSGetModemCount();
+                    rc = _wrapper.GetDtuCount();
                     if (rc != SiteOnline)
                     {
                         Logger.Enqueue("刷新DTU列表");
@@ -242,12 +260,12 @@ namespace DTUServiceMonitor
                             SiteInfoList.Clear();
                             for (uint i = 0; i < rc; i++)
                             {
-                                DtuInfoStruct dis = new DtuInfoStruct();
-                                if (GPRSDTUWrapper.DSGetModemByPosition(i, ref dis) > 0)
+                                IInfoStruct dis = _infoStruct.CreateNewInstance();
+                                if (_wrapper.GetDtuByPosition(i, ref dis) > 0)
                                 {
-                                    int id =BitConverter.ToInt32(dis.m_dtuId,0);
-                                    string sim = Encoding.Default.GetString(dis.m_phoneno,0,11);
-                                    string ip = StIPtoString(dis.m_dynip);
+                                    int id =BitConverter.ToInt32(dis.Id,0);
+                                    string sim = Encoding.Default.GetString(dis.PhoneNo,0,11);
+                                    string ip = StIPtoString(dis.DynamicIp);
                                     string sitename = string.Format("{0}:{1}", id, sim);
                                     SiteInfoList.Add(new Hashtable
                                     {
@@ -312,7 +330,7 @@ namespace DTUServiceMonitor
         public void Dispose()
         {
             IsRunning = false;
-            GPRSDTUWrapper.DSStopService();
+            _wrapper.StopService();
         }
 
     }

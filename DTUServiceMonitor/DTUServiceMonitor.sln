@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTUServiceMonitor", "DTUServiceMonitor\DTUServiceMonitor.csproj", "{2AFACDE0-998C-454E-98B8-24AF219569CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTUService", "DTUServiceMonitor\DTUService.csproj", "{2AFACDE0-998C-454E-98B8-24AF219569CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTUService.Interface", "DTUService.Interface\DTUService.Interface.csproj", "{31B02C9C-E035-4BBD-A5B0-3B91B1A1380D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GprsdllWrapper", "GprsdllWrapper\GprsdllWrapper.csproj", "{DAAA54AC-92F9-40B3-B281-EC644140182B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModSimWrapper", "ModSimWrapper\ModSimWrapper.csproj", "{7D93FF7D-85FD-4164-9D0D-B38B039266C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{2AFACDE0-998C-454E-98B8-24AF219569CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AFACDE0-998C-454E-98B8-24AF219569CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AFACDE0-998C-454E-98B8-24AF219569CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31B02C9C-E035-4BBD-A5B0-3B91B1A1380D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31B02C9C-E035-4BBD-A5B0-3B91B1A1380D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31B02C9C-E035-4BBD-A5B0-3B91B1A1380D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31B02C9C-E035-4BBD-A5B0-3B91B1A1380D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAAA54AC-92F9-40B3-B281-EC644140182B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAAA54AC-92F9-40B3-B281-EC644140182B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAAA54AC-92F9-40B3-B281-EC644140182B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAAA54AC-92F9-40B3-B281-EC644140182B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D93FF7D-85FD-4164-9D0D-B38B039266C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D93FF7D-85FD-4164-9D0D-B38B039266C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D93FF7D-85FD-4164-9D0D-B38B039266C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D93FF7D-85FD-4164-9D0D-B38B039266C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

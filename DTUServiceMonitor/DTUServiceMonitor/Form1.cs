@@ -25,7 +25,7 @@ namespace DTUServiceMonitor
         private ModbusIpMaster modeMaster;
         private delegate void ShowText(RichTextBox rb,string str);
 
-        private DTUAdapter dtuAdapter = new DTUAdapter();
+        private DTUAdapter dtuAdapter = new DTUAdapter(@"..\..\Wrappers\Gprsdll\GprsdllWrapper.dll");
 
 
         private ShowText showText;
